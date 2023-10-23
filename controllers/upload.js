@@ -23,4 +23,23 @@ module.exports = {
 			res.send(finalResult);
 		}
 	},
+	createMultiple: async (req, res) => {
+		let finalResult = {
+			 data: [],
+			 success: false,
+			 message: ''
+		}
+		try{
+			 if(!req.files){
+						throw new Error("File tidak ditemukan")
+			 }
+			 finalResult.data = req.files;
+			 finalResult.success = true;
+			 finalResult.message = "File Berhasil diunggah";
+			 res.send(finalResult);
+		}catch(e){
+			 finalResult.message = e.message;
+			 res.send(finalResult);
+		}
+  },
 }
