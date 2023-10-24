@@ -1,10 +1,11 @@
 require('dotenv').config();
-const { DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { DeleteObjectCommand, DeleteObjectsCommand } = require('@aws-sdk/client-s3');
 const { s3 } = require('../helpers/upload');
 
 module.exports = {
 	createOne: async (req, res) => {
 		let finalResult = {
+			key: '',
 			data: {},
 			success: false,
 			message: ''
@@ -13,12 +14,13 @@ module.exports = {
 			if(!req.file){
 				throw new Error("File tidak ditemukan")
 			}
+			const { pathname } = new URL(req.file.location);
+			finalResult.key = pathname.substr(1);
 			finalResult.data = req.file;
 			finalResult.success = true;
 			finalResult.message = "File Berhasil diunggah";
 			res.send(finalResult);
 		}catch(e){
-			console.log(e.message);
 			finalResult.message = e.message;
 			res.send(finalResult);
 		}
@@ -31,7 +33,7 @@ module.exports = {
 		}
 		try{
 			 if(!req.files){
-						throw new Error("File tidak ditemukan")
+				 throw new Error("File tidak ditemukan")
 			 }
 			 finalResult.data = req.files;
 			 finalResult.success = true;
@@ -41,7 +43,7 @@ module.exports = {
 			 finalResult.message = e.message;
 			 res.send(finalResult);
 		}
-  	},
+	},
 	deleteOne: async (req, res) => {
 		let finalResult = {
 			data: null,
@@ -71,7 +73,7 @@ module.exports = {
 			message: ''
 		}
 		try{
-			const command = new DeleteObjectCommand({
+			const command = new DeleteObjectsCommand({
 				Bucket: process.env.Bucket,
 				Delete: {
 						Objects: [{ Key: '/nama-folder/file-1.ext' },{ Key: '/nama-folder/file-2.ext' }],
