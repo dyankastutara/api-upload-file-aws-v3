@@ -6,6 +6,6 @@ const {upload} = require('../helpers/upload');
 router.post('/', upload.single('single-file'), controller.createOne);
 router.post('/multiple', upload.any(), controller.createMultiple);
 router.delete('/single', controller.deleteOne);
-// router.delete('/multiple', controller.deleteMultiple);
+router.delete('/multiple', controller.deleteMultiple);
 
 module.exports = router
