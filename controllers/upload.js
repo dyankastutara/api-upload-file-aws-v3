@@ -1,8 +1,40 @@
 require('dotenv').config();
 const { DeleteObjectCommand, DeleteObjectsCommand } = require('@aws-sdk/client-s3');
+const { Upload } = require("@aws-sdk/lib-storage");
+const axios = require("axios");
+const sharp = require('sharp');
 const { s3 } = require('../helpers/upload');
 
 module.exports = {
+	createFromUrl : async (req, res) => {
+		let result = {
+      location: '',
+  		success: false,
+  		error: false
+  	}
+    try{
+      const response = await axios({method: 'get', url: req.body.url, responseType: 'stream'})
+      let bodyConvert = response.data.pipe(sharp())
+      const params = {
+        Key: req.body.key,
+        Bucket: process.env.BUCKET,
+        Body: bodyConvert,
+  			ACL:'public-read'
+  		};
+      const parallelUploads3 = new Upload({
+  			client: s3,
+  			params
+  		});
+      parallelUploads3.on("httpUploadProgress", (progress) => {});
+      await parallelUploads3.done();
+      result.location = parallelUploads3.singleUploadResult.Location;
+      result.success = true;
+  		res.status(200).json(result);
+    }catch(e){
+      result.error = true;
+			res.status(200).json(result);
+    }
+	},
 	createOne: async (req, res) => {
 		let finalResult = {
 			key: '',
